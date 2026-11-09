@@ -66,6 +66,11 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line-2);border
 .chip{height:30px;padding:0 10px;border:1px dashed var(--line-2);border-radius:999px;font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
 .chip.on{border-style:solid;background:var(--accent-soft);color:var(--accent);border-color:transparent}
 .filters .grow{flex:1}
+.merged{font-size:11.5px;color:var(--faint);margin-top:4px;max-width:80ch}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:-4px;overflow-x:auto}
+.tab{padding:7px 12px;font-size:13px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab.on{color:var(--fg);border-color:var(--fg);font-weight:500}
+.l2note{font-size:12px;color:var(--faint);padding:2px 8px 0;line-height:1.5;white-space:normal}
 
 .tablewrap{flex:1;min-height:0;display:flex;flex-direction:column;min-width:0;background:var(--surface)}
 .tablescroll{flex:1;min-height:0;overflow:auto}
@@ -144,6 +149,9 @@ tr:hover td{background:var(--bg)}
 .map ul{margin:0;padding:0;list-style:none;font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
 .out{margin-top:20px;padding-top:14px;border-top:1px dashed var(--line-2);font-size:12.5px;color:var(--muted)}
 .out b{color:var(--fg);font-weight:500}
+.map li{display:flex;flex-direction:column;margin-bottom:4px}
+.map .mi{color:var(--fg)}
+.map small{font-size:11px;color:var(--faint);line-height:1.35}
 
 @media (max-width:820px){
   :root{--rail:64px}
@@ -187,9 +195,10 @@ body{margin:0}
      <div class="content-head">
       <div class="crumbs" id="crumbs"></div>
       <div class="ph">
-        <div><h1 id="title">Transakcje</h1><div class="count" id="count"></div></div>
+        <div><h1 id="title">Transakcje</h1><div class="count" id="count"></div><div class="merged" id="merged"></div></div>
         <div class="ph-actions"><button class="ghost">Importuj</button><button class="ghost">Eksportuj</button><button class="primary">+ Utwórz</button></div>
       </div>
+      <div class="tabs" id="tabs" hidden></div>
       <div class="filters">
         <span class="chip on">Tylko moi klienci ✕</span>
         <span class="chip">Kierunek</span>
@@ -214,11 +223,11 @@ body{margin:0}
   <div class="sheet" role="dialog" aria-label="Mapa informacji">
     <div class="sheet-head">
       <div><h3>Mapa nawigacji CRM Doradcy</h3>
-      <p>Moduły z obecnego ERP (9 grup, ~110 pozycji w jednym płaskim menu) przepisane na sekcje według pracy doradcy. Poziom 1 to rail, poziom 2 to panel z grupami.</p></div>
+      <p>Obecny ERP: ~110 pozycji w płaskim menu, wiele powtórzeń (np. „Transakcje” w każdej grupie, „Transakcje własne” 2×, „Historia kontaktów” w Kliencie i Compliance). Tu każdy moduł występuje raz. Podobne listy scalone w jeden widok z zakładkami, a dane pojedynczego klienta przeniesione na kartę klienta. Pod każdą pozycją: które moduły ERP zastępuje.</p></div>
       <button class="icon-btn" id="closeMap" aria-label="Zamknij">✕</button>
     </div>
     <div class="map" id="map"></div>
-    <div class="out"><b>Poza CRM doradcy (zostaje w ERP / Administracji):</b> IT (Uprawnienia, CBU – Role, Systemy, Zasoby, Konta, Profile dostępu, Uprawnienia atomowe, Parametry systemowe, Workflow, Rejestr incydentów ICT, Zgłoszenia IT) · Kadry HR (Jednostki organizacyjne, Stanowiska, Osoby, Kandydaci, Osoby szkolące, Szkolenia wstępne/wewnętrzne) · Dep. Prawny (Zgłoszenia DP, Projekty prawne, Repozytorium, Dokumenty prawne i wersje) · SINF (STIR_PLIK) · Wnioski Osoby Prawnej, IDM Dokumenty, Powiadomienia/Dokumenty PN, Instytucje finansowe – słownik.</div>
+    <div class="out"><b>Poza CRM doradcy (zostaje w ERP):</b> IT (CBU – Systemy, Zasoby, Uprawnienia atomowe, Rejestr incydentów ICT, Zgłoszenia IT, Załączniki email) · Kadry HR (Jednostki organizacyjne, Stanowiska, Osoby, Kandydaci, Osoby szkolące, Szkolenia wstępne/wewnętrzne) · Dep. Prawny (Zgłoszenia DP, Projekty prawne, Repozytorium, Dokumenty prawne i wersje) · SINF (STIR_PLIK) · Wnioski Osoby Prawnej, IDM Dokumenty, Dokumenty PN.</div>
   </div>
 </div>
 
@@ -238,41 +247,32 @@ const I = {
 };
 const svg = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${I[k]}</svg>`;
 
-// [label, badge?, roleTag?]
+// item: [label, badge?, merges (stare moduły ERP scalone w ten widok), tabs?]
 const NAV = [
  {id:'start',label:'Pulpit',icon:'home',groups:[
-   {items:[['Mój dzień'],['Zadania','7'],['Powiadomienia','3'],['Ostatnio przeglądane']]}]},
+   {items:[['Mój dzień'],['Zadania','7','+ zgody i oświadczenia do odnowienia'],['Powiadomienia','3','Powiadomienia PN']]}]},
  {id:'klienci',label:'Klienci',icon:'users',groups:[
-   {title:'Baza',items:[['Moi klienci'],['Wszyscy klienci'],['Byty powiązane'],['Beneficjenci rzeczywiści']]},
-   {title:'Dane klienta',items:[['Rachunki (Sidoma)'],['Zgody'],['Oświadczenia do zleceń'],['Notatki służbowe']]},
-   {title:'Kontakty',items:[['Historia kontaktów'],['Kontakty niepowiązane']]}]},
+   {items:[['Moi klienci',null,'Klienci (filtr: opiekun = ja)',['Wszyscy','Aktywni','Bez kontaktu 90 dni']],['Wszyscy klienci',null,'Klienci'],['Byty powiązane',null,'Byty powiązane, Beneficjenci rzeczywiści',['Grupy','Beneficjenci rzeczywiści']]]},
+   {title:'Na karcie klienta',note:true,items:[['Rachunki · Zgody · Oświadczenia · Notatki służbowe',null,'Sidoma-Rachunki, Zgody, Oświadczenia do zleceń i transakcji, Notatki służbowe']]}]},
  {id:'aktywnosci',label:'Aktywności',icon:'cal',groups:[
-   {items:[['Kalendarz'],['Spotkania','2'],['Rozmowy telefoniczne'],['Wiadomości e-mail'],['Notatki'],['Tour Plan']]}]},
+   {items:[['Kalendarz',null,'Kalendarz'],['Historia kontaktów',null,'Spotkania, Rozmowy telefoniczne, Wiadomości e-mail, Notatki, Historia kontaktów, Historia kontaktów niepowiązanych',['Wszystkie','Spotkania','Telefony','E-mail','Notatki','Niepowiązane']],['Tour Plan',null,'Tour Plan']]}]},
  {id:'sprzedaz',label:'Sprzedaż',icon:'trend',groups:[
-   {title:'Zapisy',items:[['Zapisy na obligacje'],['Zapisy na FIZ']]},
-   {title:'Obrót',items:[['Zlecenia'],['Transakcje'],['Transakcje RW CI']]},
-   {title:'Plan',items:[['Prognozy'],['Definicje prognoz']]}]},
+   {items:[['Zapisy',null,'Zapisy na obligacje, Zapisy na FIZ',['Wszystkie','Obligacje','FIZ']],['Zlecenia',null,'Zlecenia'],['Transakcje',null,'Transakcje, Transakcje RW CI',['Wszystkie','Obligacje','Certyfikaty FIZ','Rynek wtórny CI']]]}]},
  {id:'oferta',label:'Oferta',icon:'box',groups:[
-   {title:'Emisje',items:[['Emisje obligacji'],['Emisje FIZ'],['Zdarzenia dla emisji'],['Partnerzy']]},
-   {title:'OTC',items:[['Tabela ofertowa OTC'],['Oferta OTC'],['Wysłane oferty OTC'],['Dokumenty OTC']]},
-   {title:'Dane referencyjne',items:[['Produkty'],['Instrumenty'],['Tabela odsetkowa'],['Kalendarz płatności'],['Kalendarz biznesowy']]}]},
+   {items:[['Emisje',null,'Emisje Obligacji, Emisje FIZ, Zdarzenia dla emisji, Partnerzy',['Wszystkie','Obligacje','FIZ','Zdarzenia']],['Oferty OTC',null,'Tabela Ofertowa OTC, Oferta OTC, Ewidencja wysłanych ofert OTC, Dokumenty OTC',['Aktualna tabela','Wysłane','Dokumenty']],['Instrumenty',null,'Instrumenty, Produkty'],['Harmonogram płatności',null,'Kalendarz płatności, Tabela odsetkowa',['Kupony','Wykupy','Stopy procentowe']]]}]},
  {id:'marketing',label:'Marketing',icon:'mega',groups:[
-   {title:'Kampanie',items:[['Kampanie marketingowe'],['Wg preferowanego kontaktu'],['GetResponse']]},
-   {title:'Mailing',items:[['Mailing'],['Listy mailingowe'],['Szablony e-mail']]}]},
+   {items:[['Kampanie',null,'Kampanie marketingowe, Mailing, GetResponse – kampanie mailingowe, Kampania wg preferowanego kontaktu',['Wszystkie','E-mail (GetResponse)','Wg preferowanego kontaktu']],['Listy odbiorców',null,'Lista Mailingowa, Lista mailingowa – raport'],['Szablony',null,'Szablony wiadomości e-mail']]}]},
  {id:'raporty',label:'Raporty',icon:'chart',groups:[
-   {items:[['Zestawienia danych'],['Raport list mailingowych']]}]},
+   {items:[['Zestawienia',null,'Zestawienia danych'],['Prognozy',null,'Prognozy',['Plan','Realizacja']]]}]},
  {id:'compliance',label:'Compliance',icon:'shield',dot:true,role:'rola',groups:[
-   {title:'Kontrola kontaktów',items:[['Monitoring kontaktów'],['Pozycje do kontroli','12'],['Notatka kontrolującego'],['Załączniki pokontrolne']]},
-   {title:'Nadzór transakcji',items:[['Nadzór transakcji'],['Restrykcje'],['Lista restrykcyjna'],['Naruszenia restrykcji']]}]},
+   {title:'Kontakty z klientami',items:[['Do kontroli','12','Pozycje do kontroli, Monitoring kontaktów'],['Notatki kontrolujących',null,'Notatka kontrolującego, Załączniki pokontrolne']]},
+   {title:'Transakcje pracowników',items:[['Rachunki pracowników',null,'Prywatne Rachunki Maklerskie, Zlecenia własne, Transakcje własne (wszystkich)'],['Wnioski o zgodę',null,'Wnioski o zgodę na transakcję'],['Restrykcje',null,'Restrykcje, Ind. pozycje Listy Restrykcyjnej, Naruszenia restrykcji',['Lista','Naruszenia']]]}]},
 ];
 const NAV_BOTTOM = [
  {id:'moje',label:'Moje',icon:'me',groups:[
-   {title:'Kadry',items:[['Urlopy / nieobecności'],['Lista obecności']]},
-   {title:'Rozwój',items:[['Szkolenia'],['Licencje zawodowe']]},
-   {title:'Rachunki własne',items:[['Transakcje własne'],['Zlecenia własne'],['Wnioski o zgodę'],['Oświadczenia i zobowiązania']]},
-   {title:'Wiedza',items:[['Regulacje wewnętrzne']]}]},
+   {items:[['Urlopy i obecności',null,'Urlopy / nieobecności, Lista obecności'],['Szkolenia i licencje',null,'Szkolenia, Rejestr licencji zawodowych'],['Mój rachunek',null,'Transakcje własne, Zlecenia własne (moje)',['Transakcje','Zlecenia','Moje wnioski']],['Oświadczenia',null,'Oświadczenia i zobowiązania'],['Regulacje',null,'Regulacje wewnętrzne, Foldery, Eksplorator Regulacji Wewnętrznych']]}]},
  {id:'admin',label:'Admin',icon:'gear',role:'rola',groups:[
-   {items:[['Użytkownicy i uprawnienia'],['Workflow'],['Parametry systemowe'],['Otwórz ERP ↗']]}]},
+   {items:[['Użytkownicy i uprawnienia',null,'Uprawnienia, CBU – Role/Profile/Konta'],['Słowniki',null,'Definicje prognoz i zapytań, Kalendarz biznesowy, Instytucje Finansowe – słownik, Dane referencyjne'],['Workflow',null,'Workflow, Parametry Systemowe'],['Otwórz ERP ↗']]}]},
 ];
 const ALL=[...NAV,...NAV_BOTTOM];
 
@@ -286,11 +286,16 @@ function render(){
   const s=ALL.find(x=>x.id===state.sec);
   $('panelTitle').innerHTML=s.label+(s.role?' <span class="role">wymaga roli</span>':'');
   $('panelBody').innerHTML=s.groups.map(g=>`<div class="grp">${g.title?`<div class="grp-title">${g.title}</div>`:''}<ul>${
+    g.note?g.items.map(([t])=>`<li class="l2note">${t}</li>`).join(''):
     g.items.map(([t,b])=>`<li><button class="l2${t===state.item?' active':''}" data-item="${t}"><span class="t">${t}</span>${b?`<span class="badge">${b}</span>`:''}</button></li>`).join('')
   }</ul></div>`).join('');
   $('panel').classList.toggle('closed',!state.open);
   $('crumbs').innerHTML=`<span>${s.label}</span><span>/</span><b>${state.item}</b>`;
   $('title').textContent=state.item;
+  const it=s.groups.flatMap(g=>g.items).find(x=>x[0]===state.item)||[];
+  $('merged').innerHTML=it[2]?`Zastępuje w ERP: ${it[2]}`:'';
+  const tabs=it[3];$('tabs').hidden=!tabs;
+  if(tabs)$('tabs').innerHTML=tabs.map((t,i)=>`<button class="tab${i===0?' on':''}">${t}</button>`).join('');
   renderTable();
 }
 const ROWS=[
@@ -330,12 +335,14 @@ document.addEventListener('click',e=>{
     render();return}
   const tr=e.target.closest('#tbl tbody tr');
   if(tr){tr.classList.toggle('sel');const n=document.querySelectorAll('#tbl tr.sel').length;$('selN').textContent=n;$('bulk').hidden=!n;return}
+  const tb=e.target.closest('.tab');
+  if(tb){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===tb));return}
   const b=e.target.closest('.l2');
   if(b){state.item=b.dataset.item;if(matchMedia('(max-width:820px)').matches)state.open=false;render();return}
 });
 $('collapse').onclick=()=>{state.open=false;render()};
 $('map').innerHTML=ALL.map(s=>`<section><h4>${svg(s.icon).replace('<svg','<svg width="16" height="16"')}${s.label}${s.role?' <span class="role">rola</span>':''}</h4>${
-  s.groups.map(g=>`${g.title?`<div class="g">${g.title}</div>`:''}<ul>${g.items.map(i=>`<li>${i[0]}</li>`).join('')}</ul>`).join('')}</section>`).join('');
+  s.groups.map(g=>`${g.title?`<div class="g">${g.title}</div>`:''}<ul>${g.items.map(i=>`<li><span class="mi">${i[0]}</span>${i[2]&&!g.note?`<small>← ${i[2]}</small>`:''}</li>`).join('')}</ul>`).join('')}</section>`).join('');
 $('openMap').onclick=()=>{$('overlay').hidden=false};
 $('closeMap').onclick=()=>{$('overlay').hidden=true};
 $('overlay').addEventListener('click',e=>{if(e.target.id==='overlay')$('overlay').hidden=true});
