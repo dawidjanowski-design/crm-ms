@@ -170,7 +170,7 @@ body{margin:0}
     <nav id="railNav"></nav>
     <div class="rail-sep"></div>
     <div id="railBottom" style="display:flex;flex-direction:column;gap:2px"></div>
-    <div class="avatar" title="Maciej Traczyk">MT</div>
+    <div class="avatar" title="Menu użytkownika: Profil, Pracownicy, Administrator, Forum wsparcia, O programie, Wyloguj">MT</div>
   </div>
 
   <aside class="panel" id="panel" aria-label="Nawigacja poziom 2">
@@ -185,7 +185,7 @@ body{margin:0}
     <header class="topbar">
       <div class="search" role="button" tabindex="0" aria-label="Szukaj">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <span>Szukaj klienta, ISIN, nr zlecenia…</span><kbd>⌘K</kbd>
+        <span>Szukaj…</span><kbd>⌘K</kbd>
       </div>
       <div class="tb-spacer"></div>
       <button class="ghost" id="openMap">Mapa IA</button>
@@ -196,21 +196,19 @@ body{margin:0}
       <div class="crumbs" id="crumbs"></div>
       <div class="ph">
         <div><h1 id="title">Transakcje</h1><div class="count" id="count"></div><div class="merged" id="merged"></div></div>
-        <div class="ph-actions"><button class="ghost">Importuj</button><button class="ghost">Eksportuj</button><button class="primary">+ Utwórz</button></div>
+        <div class="ph-actions"><button class="ghost">Importuj</button><button class="primary">+ Utwórz</button></div>
       </div>
       <div class="tabs" id="tabs" hidden></div>
       <div class="filters">
-        <span class="chip on">Tylko moi klienci ✕</span>
-        <span class="chip">Kierunek</span>
-        <span class="chip">Rynek</span>
-        <span class="chip">Data rozliczenia</span>
-        <span class="chip">+ Filtr</span>
+        <span class="chip on">Tylko moje elementy ✕</span>
+        <span class="chip">Szybki filtr</span>
+        <span class="chip">Zaawansowany filtr</span>
         <span class="grow"></span>
-        <button class="ghost">Kolumny</button><button class="ghost">Zapisane widoki ▾</button>
+        <button class="ghost">Wybierz kolumny</button>
       </div>
      </div>
       <div class="tablewrap">
-        <div class="bulk" id="bulk" hidden><b id="selN">0</b> zaznaczone · <button>Eksportuj</button><button>Masowa aktualizacja</button><button>Usuń</button></div>
+        <div class="bulk" id="bulk" hidden><b id="selN">0</b> zaznaczone · <button>Masowa aktualizacja</button><button>Połącz duplikaty</button><button>Eksportuj</button><button>Usuń</button></div>
         <div class="tablescroll"><table id="tbl"></table></div>
         <div class="tfoot"><span id="range"></span><span class="note">Wireframe · dane przykładowe</span><div class="pager"><span>‹</span><span class="cur">1</span><span>2</span><span>3</span><span>…</span><span>›</span></div></div>
       </div>
@@ -223,11 +221,11 @@ body{margin:0}
   <div class="sheet" role="dialog" aria-label="Mapa informacji">
     <div class="sheet-head">
       <div><h3>Mapa nawigacji CRM Doradcy</h3>
-      <p>Obecny ERP: ~110 pozycji w płaskim menu, wiele powtórzeń (np. „Transakcje” w każdej grupie, „Transakcje własne” 2×, „Historia kontaktów” w Kliencie i Compliance). Tu każdy moduł występuje raz. Podobne listy scalone w jeden widok z zakładkami, a dane pojedynczego klienta przeniesione na kartę klienta. Pod każdą pozycją: które moduły ERP zastępuje.</p></div>
+      <p>Górne menu ERP: 9 grup + „Wszystko” = 104 moduły. „Transakcje” na końcu każdej grupy to przypięty bieżący moduł (SuiteCRM), nie duplikat. Faktyczne problemy: „Historia kontaktów” w 2 grupach (Klient i Compliance), dwa różne moduły o nazwie „Transakcje własne”, a 26 modułów nie ma żadnej grupy i jest tylko w „Wszystko”. Tu każdy moduł występuje dokładnie raz, pod oryginalną nazwą. Pod każdą pozycją: gdzie jest dziś w ERP.</p></div>
       <button class="icon-btn" id="closeMap" aria-label="Zamknij">✕</button>
     </div>
     <div class="map" id="map"></div>
-    <div class="out"><b>Poza CRM doradcy (zostaje w ERP):</b> IT (CBU – Systemy, Zasoby, Uprawnienia atomowe, Rejestr incydentów ICT, Zgłoszenia IT, Załączniki email) · Kadry HR (Jednostki organizacyjne, Stanowiska, Osoby, Kandydaci, Osoby szkolące, Szkolenia wstępne/wewnętrzne) · Dep. Prawny (Zgłoszenia DP, Projekty prawne, Repozytorium, Dokumenty prawne i wersje) · SINF (STIR_PLIK) · Wnioski Osoby Prawnej, IDM Dokumenty, Dokumenty PN.</div>
+    <div class="out"><b>Menu użytkownika (avatar):</b> Profil · Pracownicy · Administrator · Forum wsparcia · O programie · Wyloguj.<br><b>Jedyna zmiana nazwy:</b> drugi moduł „Transakcje własne” (eksplorator z grupy Kadry) → „Transakcje własne (eksplorator)”, żeby odróżnić go od rejestru.</div>
   </div>
 </div>
 
@@ -243,36 +241,28 @@ const I = {
   shield:'<path d="M12 3 19 6v6c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/><path d="m9 12 2 2 4-4"/>',
   me:'<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="12" cy="10" r="2.6"/><path d="M7.5 17c.9-2 2.5-3 4.5-3s3.6 1 4.5 3"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
+  file:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
+  scale:'<path d="M12 4v16M7 20h10M4 8h16"/><path d="m6 8-3 6a3 3 0 0 0 6 0zM18 8l-3 6a3 3 0 0 0 6 0z"/>',
+  team:'<circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M2.5 19c.5-3 2.7-4.5 5.5-4.5s5 1.5 5.5 4.5M13 15c.9-.4 1.9-.5 3-.5 2.8 0 5 1.5 5.5 4.5"/>',
   help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.5V14"/><circle cx="12" cy="17" r=".6" fill="currentColor"/>'
 };
 const svg = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${I[k]}</svg>`;
 
-// item: [label, badge?, merges (stare moduły ERP scalone w ten widok), tabs?]
+// item: [nazwa modułu w ERP, badge, grupa w obecnym górnym menu ERP]
 const NAV = [
- {id:'start',label:'Pulpit',icon:'home',groups:[
-   {items:[['Mój dzień'],['Zadania','7','+ zgody i oświadczenia do odnowienia'],['Powiadomienia','3','Powiadomienia PN']]}]},
- {id:'klienci',label:'Klienci',icon:'users',groups:[
-   {items:[['Moi klienci',null,'Klienci (filtr: opiekun = ja)',['Wszyscy','Aktywni','Bez kontaktu 90 dni']],['Wszyscy klienci',null,'Klienci'],['Byty powiązane',null,'Byty powiązane, Beneficjenci rzeczywiści',['Grupy','Beneficjenci rzeczywiści']]]},
-   {title:'Na karcie klienta',note:true,items:[['Rachunki · Zgody · Oświadczenia · Notatki służbowe',null,'Sidoma-Rachunki, Zgody, Oświadczenia do zleceń i transakcji, Notatki służbowe']]}]},
- {id:'aktywnosci',label:'Aktywności',icon:'cal',groups:[
-   {items:[['Kalendarz',null,'Kalendarz'],['Historia kontaktów',null,'Spotkania, Rozmowy telefoniczne, Wiadomości e-mail, Notatki, Historia kontaktów, Historia kontaktów niepowiązanych',['Wszystkie','Spotkania','Telefony','E-mail','Notatki','Niepowiązane']],['Tour Plan',null,'Tour Plan']]}]},
- {id:'sprzedaz',label:'Sprzedaż',icon:'trend',groups:[
-   {items:[['Zapisy',null,'Zapisy na obligacje, Zapisy na FIZ',['Wszystkie','Obligacje','FIZ']],['Zlecenia',null,'Zlecenia'],['Transakcje',null,'Transakcje, Transakcje RW CI',['Wszystkie','Obligacje','Certyfikaty FIZ','Rynek wtórny CI']]]}]},
- {id:'oferta',label:'Oferta',icon:'box',groups:[
-   {items:[['Emisje',null,'Emisje Obligacji, Emisje FIZ, Zdarzenia dla emisji, Partnerzy',['Wszystkie','Obligacje','FIZ','Zdarzenia']],['Oferty OTC',null,'Tabela Ofertowa OTC, Oferta OTC, Ewidencja wysłanych ofert OTC, Dokumenty OTC',['Aktualna tabela','Wysłane','Dokumenty']],['Instrumenty',null,'Instrumenty, Produkty'],['Harmonogram płatności',null,'Kalendarz płatności, Tabela odsetkowa',['Kupony','Wykupy','Stopy procentowe']]]}]},
- {id:'marketing',label:'Marketing',icon:'mega',groups:[
-   {items:[['Kampanie',null,'Kampanie marketingowe, Mailing, GetResponse – kampanie mailingowe, Kampania wg preferowanego kontaktu',['Wszystkie','E-mail (GetResponse)','Wg preferowanego kontaktu']],['Listy odbiorców',null,'Lista Mailingowa, Lista mailingowa – raport'],['Szablony',null,'Szablony wiadomości e-mail']]}]},
- {id:'raporty',label:'Raporty',icon:'chart',groups:[
-   {items:[['Zestawienia',null,'Zestawienia danych'],['Prognozy',null,'Prognozy',['Plan','Realizacja']]]}]},
- {id:'compliance',label:'Compliance',icon:'shield',dot:true,role:'rola',groups:[
-   {title:'Kontakty z klientami',items:[['Do kontroli','12','Pozycje do kontroli, Monitoring kontaktów'],['Notatki kontrolujących',null,'Notatka kontrolującego, Załączniki pokontrolne']]},
-   {title:'Transakcje pracowników',items:[['Rachunki pracowników',null,'Prywatne Rachunki Maklerskie, Zlecenia własne, Transakcje własne (wszystkich)'],['Wnioski o zgodę',null,'Wnioski o zgodę na transakcję'],['Restrykcje',null,'Restrykcje, Ind. pozycje Listy Restrykcyjnej, Naruszenia restrykcji',['Lista','Naruszenia']]]}]},
+ {id:'start',label:'Start',icon:'home',groups:[{ items:[['Strona Główna',null,'IT'],['Kalendarz',null,'tylko „Wszystko”']]}]},
+ {id:'klienci',label:'Klienci',icon:'users',groups:[{ items:[['Klienci',null,'Klient'],['Byty powiązane',null,'Klient'],['Sidoma-Rachunki',null,'Klient']]},{title:'Dokumenty klienta', items:[['Notatki Służbowe',null,'Klient'],['Oświadczenia do zleceń i transakcji',null,'Klient'],['Powiadomienia PN',null,'Klient'],['Dokumenty PN',null,'tylko „Wszystko”']]}]},
+ {id:'aktywnosci',label:'Aktywności',icon:'cal',groups:[{ items:[['Historia kontaktów',null,'Klient, Compliance'],['Spotkania',null,'tylko „Wszystko”'],['Rozmowy telefoniczne',null,'tylko „Wszystko”'],['Notatki',null,'tylko „Wszystko”'],['Wiadomości e-mail',null,'IT'],['Załączniki email',null,'tylko „Wszystko”']]}]},
+ {id:'sprzedaz',label:'Sprzedaż',icon:'trend',groups:[{title:'Zapisy', items:[['Zapisy na obligacje',null,'Klient'],['Zapisy na FIZ',null,'Klient']]},{title:'Obrót', items:[['Zlecenia',null,'Klient'],['Transakcje',null,'Klient'],['Transakcje RW CI',null,'Klient']]},{title:'Planowanie', items:[['Prognozy',null,'Sprzedaż'],['Definicje prognoz i zapytań',null,'Sprzedaż'],['Tour Plan',null,'Sprzedaż']]},{title:'Raporty', items:[['Zestawienia danych',null,'Klient']]}]},
+ {id:'emisje',label:'Emisje',icon:'box',groups:[{ items:[['Emisje Obligacji',null,'Emisje'],['Emisje FIZ',null,'Emisje'],['Zdarzenia dla emisji',null,'Emisje'],['Partnerzy',null,'Emisje'],['Produkty',null,'Emisje'],['Instrumenty',null,'tylko „Wszystko”']]},{title:'OTC', items:[['Oferta OTC',null,'Klient'],['Tabela Ofertowa OTC',null,'Emisje'],['Ewidencja wysłanych ofert OTC',null,'Emisje'],['Dokumenty OTC',null,'tylko „Wszystko”']]},{title:'Dane referencyjne', items:[['Dane referencyjne',null,'Emisje'],['Tabela Odsetkowa',null,'Emisje'],['Kalendarz płatności',null,'Emisje'],['Kalendarz biznesowy',null,'Emisje']]}]},
+ {id:'marketing',label:'Marketing',icon:'mega',groups:[{title:'Kampanie', items:[['Kampanie marketingowe',null,'Marketing'],['Getresponse - kampanie mailingowe',null,'Marketing'],['Kampania wg preferowanego kontaktu',null,'Marketing']]},{title:'Mailing', items:[['Mailing',null,'Klient'],['Lista Mailingowa',null,'Marketing'],['Lista mailingowa - raport',null,'Marketing'],['Szablony wiadomości e-mail',null,'tylko „Wszystko”']]},{title:'Zgody', items:[['Zgody',null,'Marketing']]}]},
+ {id:'compliance',label:'Compliance',icon:'shield',role:'rola',groups:[{title:'Kontrola kontaktów', items:[['Monitoring kontaktów',null,'Compliance'],['Pozycje do kontroli',null,'Compliance'],['Notatka kontrolującego',null,'Compliance'],['Załączniki pokontrolne',null,'tylko „Wszystko”'],['Historia kontaktów niepowiązanych',null,'Compliance']]},{title:'Transakcje pracowników', items:[['Nadzór transakcji',null,'Compliance'],['Prywatne Rachunki Maklerskie',null,'tylko „Wszystko”'],['Zlecenia własne',null,'tylko „Wszystko”'],['Transakcje własne',null,'tylko „Wszystko”'],['Transakcje własne (eksplorator)',null,'Kadry'],['Wnioski o zgodę na transakcję',null,'tylko „Wszystko”']]},{title:'Restrykcje', items:[['Restrykcje',null,'tylko „Wszystko”'],['Ind. pozycje Listy Restrykcyjnej',null,'tylko „Wszystko”'],['Naruszenia restrykcji',null,'tylko „Wszystko”']]},{title:'Osoby prawne i AML', items:[['Wnioski Osoby Prawnej',null,'Compliance'],['Dokumenty do Wniosku Osoby Prawnej',null,'Compliance'],['Beneficjenci rzeczywiści',null,'Compliance'],['IDM Dokumenty',null,'Compliance'],['Instytucje Finansowe - słownik',null,'Compliance']]},{title:'Regulacje', items:[['Regulacje wewnętrzne',null,'Compliance'],['Eksplorator Regulacji Wewnętrznych',null,'Compliance'],['Foldery',null,'Compliance'],['Oświadczenia i zobowiązania',null,'Compliance']]}]}
 ];
 const NAV_BOTTOM = [
- {id:'moje',label:'Moje',icon:'me',groups:[
-   {items:[['Urlopy i obecności',null,'Urlopy / nieobecności, Lista obecności'],['Szkolenia i licencje',null,'Szkolenia, Rejestr licencji zawodowych'],['Mój rachunek',null,'Transakcje własne, Zlecenia własne (moje)',['Transakcje','Zlecenia','Moje wnioski']],['Oświadczenia',null,'Oświadczenia i zobowiązania'],['Regulacje',null,'Regulacje wewnętrzne, Foldery, Eksplorator Regulacji Wewnętrznych']]}]},
- {id:'admin',label:'Admin',icon:'gear',role:'rola',groups:[
-   {items:[['Użytkownicy i uprawnienia',null,'Uprawnienia, CBU – Role/Profile/Konta'],['Słowniki',null,'Definicje prognoz i zapytań, Kalendarz biznesowy, Instytucje Finansowe – słownik, Dane referencyjne'],['Workflow',null,'Workflow, Parametry Systemowe'],['Otwórz ERP ↗']]}]},
+ {id:'sinf',label:'SINF',icon:'file',role:'rola',groups:[{ items:[['STIR_PLIK',null,'SINF']]}]},
+ {id:'prawny',label:'Dep. Prawny',icon:'scale',role:'rola',groups:[{title:'Zgłoszenia', items:[['Zgłoszenia DP',null,'Dep. Prawny']]},{title:'Projekty', items:[['Projekty Prawne',null,'Dep. Prawny'],['Projekt Prawny',null,'tylko „Wszystko”'],['Akcje dla projektu prawnego',null,'tylko „Wszystko”'],['Foldery projektowe',null,'tylko „Wszystko”']]},{title:'Dokumenty', items:[['Projekty dokumentów prawnych',null,'tylko „Wszystko”'],['Wersje dok. projektów prawnych',null,'tylko „Wszystko”'],['Dokumenty prawne',null,'tylko „Wszystko”'],['Wersje dok. prawnych',null,'tylko „Wszystko”'],['Dokumenty wynikowe',null,'tylko „Wszystko”']]},{title:'Repozytorium', items:[['Repozytorium',null,'Dep. Prawny'],['Foldery repozytorium',null,'tylko „Wszystko”']]}]},
+ {id:'kadry',label:'Kadry',icon:'team',role:'rola',groups:[{title:'Obecność', items:[['Urlopy / nieobecności',null,'Kadry'],['Lista obecności',null,'Kadry']]},{title:'Organizacja', items:[['Osoby',null,'Kadry'],['Jednostki Organizacyjne',null,'Kadry'],['Stanowiska',null,'Kadry'],['Kandydaci do pracy',null,'Kadry']]},{title:'Szkolenia', items:[['Szkolenia',null,'Kadry'],['Szkolenia wstępne',null,'Kadry'],['Szkolenia wewnętrzne',null,'Kadry'],['Osoby szkolące',null,'Kadry'],['Rejestr licencji zawodowych',null,'Kadry']]}]},
+ {id:'it',label:'IT',icon:'gear',role:'rola',groups:[{ items:[['Uprawnienia',null,'IT'],['Zgłoszenia IT',null,'IT'],['Rejestr Incydentów ICT',null,'IT'],['Parametry Systemowe',null,'IT'],['Workflow',null,'IT']]},{title:'CBU', items:[['CBU - Konta',null,'IT'],['CBU - Profile dostępu',null,'IT'],['CBU - Role',null,'IT'],['CBU - Systemy',null,'IT'],['CBU - Uprawnienia atomowe',null,'IT'],['CBU - Zasoby',null,'IT']]}]}
 ];
 const ALL=[...NAV,...NAV_BOTTOM];
 
@@ -293,7 +283,7 @@ function render(){
   $('crumbs').innerHTML=`<span>${s.label}</span><span>/</span><b>${state.item}</b>`;
   $('title').textContent=state.item;
   const it=s.groups.flatMap(g=>g.items).find(x=>x[0]===state.item)||[];
-  $('merged').innerHTML=it[2]?`Zastępuje w ERP: ${it[2]}`:'';
+  $('merged').innerHTML=it[2]?`Grupa w obecnym ERP: ${it[2]}`:'';
   const tabs=it[3];$('tabs').hidden=!tabs;
   if(tabs)$('tabs').innerHTML=tabs.map((t,i)=>`<button class="tab${i===0?' on':''}">${t}</button>`).join('');
   renderTable();
@@ -342,7 +332,7 @@ document.addEventListener('click',e=>{
 });
 $('collapse').onclick=()=>{state.open=false;render()};
 $('map').innerHTML=ALL.map(s=>`<section><h4>${svg(s.icon).replace('<svg','<svg width="16" height="16"')}${s.label}${s.role?' <span class="role">rola</span>':''}</h4>${
-  s.groups.map(g=>`${g.title?`<div class="g">${g.title}</div>`:''}<ul>${g.items.map(i=>`<li><span class="mi">${i[0]}</span>${i[2]&&!g.note?`<small>← ${i[2]}</small>`:''}</li>`).join('')}</ul>`).join('')}</section>`).join('');
+  s.groups.map(g=>`${g.title?`<div class="g">${g.title}</div>`:''}<ul>${g.items.map(i=>`<li><span class="mi">${i[0]}</span>${i[2]?`<small>ERP: ${i[2]}</small>`:''}</li>`).join('')}</ul>`).join('')}</section>`).join('');
 $('openMap').onclick=()=>{$('overlay').hidden=false};
 $('closeMap').onclick=()=>{$('overlay').hidden=true};
 $('overlay').addEventListener('click',e=>{if(e.target.id==='overlay')$('overlay').hidden=true});
